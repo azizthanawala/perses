@@ -13,13 +13,14 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { Table, TableProps } from '@perses-dev/components';
-import { Button } from '@mui/material';
+import { TableVirtuoso } from 'react-virtuoso';
 
 function generateMockTableData(count: number): TableProps['data'] {
   const data: TableProps['data'] = [];
   for (let i = 0; i < count; i++) {
     data.push({
       name: `name ${i}`,
+      value: i,
     });
   }
   return data;
@@ -28,7 +29,7 @@ function generateMockTableData(count: number): TableProps['data'] {
 const meta: Meta<typeof Table> = {
   component: Table,
   args: {
-    data: generateMockTableData(10),
+    data: generateMockTableData(10000),
   },
   parameters: {
     // TODO: investigate how to get snapshots of interactive elements like

@@ -16,11 +16,14 @@ import {
   TableCell,
   TableBody,
   TableSortLabel,
+  Paper,
 } from '@mui/material';
 import { useState } from 'react';
+import { TableVirtuoso, TableComponents } from 'react-virtuoso';
 
 type MockData = {
   name: string;
+  value: number;
 };
 
 export interface TableProps {
@@ -32,7 +35,19 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
     accessorKey: 'name',
     header: 'Name',
   },
+  {
+    accessorKey: 'value',
+    header: 'Value',
+  },
 ];
+
+const VirtuosoTableComponents: TableComponents<MockData> = {
+  Scroller: React.forwardRef<HTMLDivElement>((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
+  Table: (props) => <MuiTable {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />,
+  TableHead,
+  TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+  TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => <TableBody {...props} ref={ref} />),
+};
 
 export function Table({ data }: TableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -47,46 +62,60 @@ export function Table({ data }: TableProps) {
     },
   });
 
-  return (
-    <TableContainer>
-      <MuiTable>
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => {
-            return (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const isSorted = header.column.getIsSorted();
+  const rows = table.getRowModel().rows;
 
-                  return (
-                    <TableCell key={header.id}>
-                      <TableSortLabel
-                        active={!!isSorted}
-                        direction={typeof isSorted === 'string' ? isSorted : undefined}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableSortLabel>
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
-        </TableHead>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => {
-            return (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </MuiTable>
-    </TableContainer>
+  return (
+    <Paper style={{ height: 400, width: '100%' }}>
+      <TableVirtuoso
+        totalCount={rows.length}
+        components={VirtuosoTableComponents}
+        fixedHeaderContent={() => {
+          return (
+            <>
+              {table.getHeaderGroups().map((headerGroup) => {
+                return (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      const isSorted = header.column.getIsSorted();
+
+                      return (
+                        <TableCell
+                          key={header.id}
+                          sx={{
+                            backgroundColor: 'background.paper',
+                          }}
+                        >
+                          <TableSortLabel
+                            active={!!isSorted}
+                            direction={typeof isSorted === 'string' ? isSorted : undefined}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableSortLabel>
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })}
+            </>
+          );
+        }}
+        itemContent={(index) => {
+          const row = rows[index];
+          if (!row) {
+            return null;
+          }
+
+          return (
+            <>
+              {row.getVisibleCells().map((cell) => {
+                return <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>;
+              })}
+            </>
+          );
+        }}
+      />
+    </Paper>
   );
 }
