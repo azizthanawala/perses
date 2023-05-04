@@ -3,10 +3,21 @@ import {
   TableOptions,
   createColumnHelper,
   getCoreRowModel,
+  getSortedRowModel,
   flexRender,
   ColumnDef,
+  SortingState,
 } from '@tanstack/react-table';
-import { Table as MuiTable, TableContainer, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import {
+  Table as MuiTable,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableSortLabel,
+} from '@mui/material';
+import { useState } from 'react';
 
 type MockData = {
   name: string;
@@ -19,12 +30,22 @@ export interface TableProps {
 const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
   {
     accessorKey: 'name',
+    header: 'Name',
   },
 ];
 
 export function Table({ data }: TableProps) {
-  const table = useReactTable({ data, columns: DEFAULT_COLUMNS, getCoreRowModel: getCoreRowModel() });
-  console.log(table);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const table = useReactTable({
+    data,
+    columns: DEFAULT_COLUMNS,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
+  });
 
   return (
     <TableContainer>
@@ -34,9 +55,17 @@ export function Table({ data }: TableProps) {
             return (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const isSorted = header.column.getIsSorted();
+
                   return (
                     <TableCell key={header.id}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      <TableSortLabel
+                        active={!!isSorted}
+                        direction={typeof isSorted === 'string' ? isSorted : undefined}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableSortLabel>
                     </TableCell>
                   );
                 })}
