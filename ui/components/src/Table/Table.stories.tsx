@@ -12,12 +12,24 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Table } from '@perses-dev/components';
+import { Table, TableProps } from '@perses-dev/components';
 import { Button } from '@mui/material';
+
+function generateMockTableData(count: number): TableProps['data'] {
+  const data: TableProps['data'] = [];
+  for (let i = 0; i < count; i++) {
+    data.push({
+      name: `name ${i}`,
+    });
+  }
+  return data;
+}
 
 const meta: Meta<typeof Table> = {
   component: Table,
-  argTypes: {},
+  args: {
+    data: generateMockTableData(10),
+  },
   parameters: {
     // TODO: investigate how to get snapshots of interactive elements like
     // tooltips. Adding a `play` that hovers to show the tooltip was not enough,
