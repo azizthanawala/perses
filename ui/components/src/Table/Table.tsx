@@ -19,6 +19,7 @@ import {
   TableSortLabel,
   Paper,
   Checkbox,
+  Box,
 } from '@mui/material';
 import { useState } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
@@ -37,6 +38,7 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
     // TODO: figure out disabling the sort icon/sorting for this one.
     id: 'rowSelect',
     enableSorting: false,
+    enableResizing: false,
     header: ({ table }) => {
       return (
         <Checkbox
@@ -86,6 +88,7 @@ export function Table({ data }: TableProps) {
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     enableRowSelection: true,
+    columnResizeMode: 'onChange',
     state: {
       sorting,
       rowSelection,
@@ -108,6 +111,8 @@ export function Table({ data }: TableProps) {
                     {headerGroup.headers.map((header) => {
                       const isSorted = header.column.getIsSorted();
                       const canSort = header.column.getCanSort();
+                      const canResize = header.column.getCanResize();
+                      console.log(`canResize: ${canResize}`);
 
                       const cellContent = flexRender(header.column.columnDef.header, header.getContext());
 
@@ -116,6 +121,8 @@ export function Table({ data }: TableProps) {
                           key={header.id}
                           sx={{
                             backgroundColor: 'background.paper',
+                            position: 'relative',
+                            width: header.getSize(),
                           }}
                         >
                           {canSort ? (
@@ -128,6 +135,33 @@ export function Table({ data }: TableProps) {
                             </TableSortLabel>
                           ) : (
                             cellContent
+                          )}
+                          {canResize && (
+                            <Box
+                              onMouseDown={header.getResizeHandler()}
+                              onTouchStart={header.getResizeHandler()}
+                              sx={{
+                                position: 'absolute',
+                                right: 0,
+                                top: 0,
+                                height: '100%',
+                                padding: 2,
+                                '&:hover': {
+                                  cursor: 'col-resize',
+                                  ' > div': {
+                                    backgroundColor: (theme) => theme.palette.text.primary,
+                                  },
+                                },
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  backgroundColor: (theme) => theme.palette.divider,
+                                  width: 2,
+                                  height: '100%',
+                                }}
+                              />
+                            </Box>
                           )}
                         </TableCell>
                       );
@@ -147,7 +181,11 @@ export function Table({ data }: TableProps) {
           return (
             <>
               {row.getVisibleCells().map((cell) => {
-                return <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>;
+                return (
+                  <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                );
               })}
             </>
           );
