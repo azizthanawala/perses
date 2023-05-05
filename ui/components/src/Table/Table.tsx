@@ -94,6 +94,21 @@ export function Table({ data }: TableProps) {
 
   const rows = table.getRowModel().rows;
 
+  // These actions would let us do things to a chart based on mouseover.
+  function handleMouseOverRow(index: number) {
+    const row = rows[index];
+    if (row) {
+      console.log(`mouseover row idx ${index}, id ${row.id}`);
+    }
+  }
+
+  function handleMouseOutRow(index: number) {
+    const row = rows[index];
+    if (row) {
+      console.log(`mouseout row idx ${index}, id ${row.id}`);
+    }
+  }
+
   const VirtuosoTableComponents: TableComponents<MockData> = {
     Scroller: forwardRef<HTMLDivElement>((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
     Table: (props) => (
@@ -104,7 +119,21 @@ export function Table({ data }: TableProps) {
       />
     ),
     TableHead,
-    TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+    TableRow: ({ item, ...props }) => {
+      const index = props['data-index'];
+      return (
+        <TableRow
+          {...props}
+          onMouseOver={() => handleMouseOverRow(index)}
+          onMouseOut={() => handleMouseOutRow(index)}
+          sx={{
+            '&:hover': {
+              backgroundColor: (theme) => theme.palette.background.default,
+            },
+          }}
+        />
+      );
+    },
     TableBody: forwardRef<HTMLTableSectionElement>((props, ref) => <TableBody {...props} ref={ref} />),
   };
 
