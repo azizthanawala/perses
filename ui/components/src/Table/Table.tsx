@@ -123,6 +123,7 @@ export function Table({ data }: TableProps) {
                       const isSorted = header.column.getIsSorted();
                       const canSort = header.column.getCanSort();
                       const canResize = header.column.getCanResize();
+                      const isResizing = header.column.getIsResizing();
                       console.log(`canResize: ${canResize}`);
 
                       const cellContent = flexRender(header.column.columnDef.header, header.getContext());
@@ -158,8 +159,9 @@ export function Table({ data }: TableProps) {
                                 top: 0,
                                 height: '100%',
                                 padding: 2,
+                                userSelect: 'none',
+                                cursor: 'col-resize',
                                 '&:hover': {
-                                  cursor: 'col-resize',
                                   ' > div': {
                                     backgroundColor: (theme) => theme.palette.text.primary,
                                   },
