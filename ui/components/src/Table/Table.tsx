@@ -21,7 +21,7 @@ import {
   Checkbox,
   Box,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
 
 type MockData = {
@@ -39,6 +39,7 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
     id: 'rowSelect',
     enableSorting: false,
     enableResizing: false,
+    size: 100,
     header: ({ table }) => {
       return (
         <Checkbox
@@ -66,15 +67,11 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
     accessorKey: 'value',
     header: 'Value',
   },
+  // {
+  //   id: 'emptyRight',
+  //   header: '',
+  // },
 ];
-
-const VirtuosoTableComponents: TableComponents<MockData> = {
-  Scroller: React.forwardRef<HTMLDivElement>((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
-  Table: (props) => <MuiTable {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />,
-  TableHead,
-  TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
-  TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => <TableBody {...props} ref={ref} />),
-};
 
 export function Table({ data }: TableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -97,8 +94,22 @@ export function Table({ data }: TableProps) {
 
   const rows = table.getRowModel().rows;
 
+  const VirtuosoTableComponents: TableComponents<MockData> = {
+    Scroller: forwardRef<HTMLDivElement>((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
+    Table: (props) => (
+      <MuiTable
+        {...props}
+        size="small"
+        sx={{ borderCollapse: 'separate', tableLayout: 'fixed', width: table.getCenterTotalSize() }}
+      />
+    ),
+    TableHead,
+    TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+    TableBody: forwardRef<HTMLTableSectionElement>((props, ref) => <TableBody {...props} ref={ref} />),
+  };
+
   return (
-    <Paper style={{ height: 400, width: '100%' }}>
+    <Box style={{ height: 400, width: '100%' }}>
       <TableVirtuoso
         totalCount={rows.length}
         components={VirtuosoTableComponents}
@@ -191,6 +202,6 @@ export function Table({ data }: TableProps) {
           );
         }}
       />
-    </Paper>
+    </Box>
   );
 }
