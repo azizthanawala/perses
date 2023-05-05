@@ -7,6 +7,7 @@ import {
   flexRender,
   ColumnDef,
   SortingState,
+  RowSelectionState,
 } from '@tanstack/react-table';
 import {
   Table as MuiTable,
@@ -17,6 +18,7 @@ import {
   TableBody,
   TableSortLabel,
   Paper,
+  Checkbox,
 } from '@mui/material';
 import { useState } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
@@ -31,6 +33,29 @@ export interface TableProps {
 }
 
 const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
+  {
+    // TODO: figure out disabling the sort icon/sorting for this one.
+    id: 'rowSelect',
+    enableSorting: false,
+    header: ({ table }) => {
+      return (
+        <Checkbox
+          checked={table.getIsAllRowsSelected()}
+          indeterminate={table.getIsSomeRowsSelected()}
+          onChange={table.getToggleAllRowsSelectedHandler()}
+        />
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <Checkbox
+          checked={row.getIsSelected()}
+          indeterminate={row.getIsSomeSelected()}
+          onChange={row.getToggleSelectedHandler()}
+        />
+      );
+    },
+  },
   {
     accessorKey: 'name',
     header: 'Name',
@@ -51,14 +76,19 @@ const VirtuosoTableComponents: TableComponents<MockData> = {
 
 export function Table({ data }: TableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const table = useReactTable({
     data,
     columns: DEFAULT_COLUMNS,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     state: {
       sorting,
+      rowSelection,
     },
   });
 
@@ -77,6 +107,9 @@ export function Table({ data }: TableProps) {
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       const isSorted = header.column.getIsSorted();
+                      const canSort = header.column.getCanSort();
+
+                      const cellContent = flexRender(header.column.columnDef.header, header.getContext());
 
                       return (
                         <TableCell
@@ -85,13 +118,17 @@ export function Table({ data }: TableProps) {
                             backgroundColor: 'background.paper',
                           }}
                         >
-                          <TableSortLabel
-                            active={!!isSorted}
-                            direction={typeof isSorted === 'string' ? isSorted : undefined}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </TableSortLabel>
+                          {canSort ? (
+                            <TableSortLabel
+                              active={!!isSorted}
+                              direction={typeof isSorted === 'string' ? isSorted : undefined}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {cellContent}
+                            </TableSortLabel>
+                          ) : (
+                            cellContent
+                          )}
                         </TableCell>
                       );
                     })}
