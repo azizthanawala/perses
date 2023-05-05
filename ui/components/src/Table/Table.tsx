@@ -147,6 +147,7 @@ export function Table({ data }: TableProps) {
                           ) : (
                             cellContent
                           )}
+                          {/* TODO: make the handles on this nicer, so the cursor doesn't flicker */}
                           {canResize && (
                             <Box
                               onMouseDown={header.getResizeHandler()}
