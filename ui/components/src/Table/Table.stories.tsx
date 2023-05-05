@@ -31,7 +31,7 @@ function generateMockTableData(count: number): TableProps['data'] {
   const data: TableProps['data'] = [];
   for (let i = 0; i < count; i++) {
     data.push({
-      name: `name ${i}`,
+      name: `my column name has a name ${i}`,
       value: i,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
     });

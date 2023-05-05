@@ -20,6 +20,7 @@ import {
   Paper,
   Checkbox,
   Box,
+  Typography,
 } from '@mui/material';
 import { useState, forwardRef } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
@@ -212,6 +213,7 @@ export function Table({ data }: TableProps) {
                                   backgroundColor: (theme) => theme.palette.divider,
                                   width: 2,
                                   height: '100%',
+                                  cursor: 'col-resize',
                                 }}
                               />
                             </Box>
@@ -236,7 +238,7 @@ export function Table({ data }: TableProps) {
               {row.getVisibleCells().map((cell) => {
                 return (
                   <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <Typography noWrap>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Typography>
                   </TableCell>
                 );
               })}
