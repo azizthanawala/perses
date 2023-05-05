@@ -14,12 +14,26 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Table, TableProps } from '@perses-dev/components';
 
+import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+
+const COLOR_SHADES = ['400', '800'] as const;
+const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
+const MOCK_COLORS = COLOR_SHADES.reduce((results, colorShade) => {
+  COLOR_NAMES.map((colorName) => {
+    if (colorShade in colorName) {
+      results.push(colorName[colorShade]);
+    }
+  });
+  return results;
+}, [] as string[]);
+
 function generateMockTableData(count: number): TableProps['data'] {
   const data: TableProps['data'] = [];
   for (let i = 0; i < count; i++) {
     data.push({
       name: `name ${i}`,
       value: i,
+      color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
     });
   }
   return data;

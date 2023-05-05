@@ -27,6 +27,7 @@ import { TableVirtuoso, TableComponents } from 'react-virtuoso';
 type MockData = {
   name: string;
   value: number;
+  color?: string;
 };
 
 export interface TableProps {
@@ -50,11 +51,20 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
       );
     },
     cell: ({ row }) => {
+      const color = row.original.color;
+
       return (
         <Checkbox
           checked={row.getIsSelected()}
           indeterminate={row.getIsSomeSelected()}
           onChange={row.getToggleSelectedHandler()}
+          // color={row.original.color}
+          sx={{
+            color: color,
+            '&.Mui-checked': {
+              color: color,
+            },
+          }}
         />
       );
     },
