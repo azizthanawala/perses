@@ -14,8 +14,8 @@ import {
   Table as MuiTable,
   TableContainer,
   TableHead,
-  TableRow,
-  TableCell,
+  TableRow as MuiTableRow,
+  TableCell as MuiTableCell,
   TableBody,
   TableSortLabel,
   Paper,
@@ -23,6 +23,7 @@ import {
   Box,
   Typography,
   TextField,
+  styled,
 } from '@mui/material';
 import { useState, forwardRef } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
@@ -87,6 +88,12 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
   // },
 ];
 
+const StyledMuiTable = styled(MuiTable)(({ theme }) => ({}));
+const StyledMuiTableRow = styled(MuiTableRow)(({ theme }) => ({}));
+export const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
+  padding: theme.spacing(0, 0, 0, 1),
+}));
+
 export function Table({ data }: TableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -134,7 +141,7 @@ export function Table({ data }: TableProps) {
   const VirtuosoTableComponents: TableComponents<MockData> = {
     Scroller: forwardRef<HTMLDivElement>((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
     Table: (props) => (
-      <MuiTable
+      <StyledMuiTable
         {...props}
         size="small"
         sx={{ borderCollapse: 'separate', tableLayout: 'fixed', width: table.getCenterTotalSize() }}
@@ -144,7 +151,7 @@ export function Table({ data }: TableProps) {
     TableRow: ({ item, ...props }) => {
       const index = props['data-index'];
       return (
-        <TableRow
+        <StyledMuiTableRow
           {...props}
           onMouseOver={() => handleMouseOverRow(index)}
           onMouseOut={() => handleMouseOutRow(index)}
@@ -174,11 +181,11 @@ export function Table({ data }: TableProps) {
               <>
                 {table.getHeaderGroups().map((headerGroup) => {
                   return (
-                    <TableRow key={headerGroup.id}>
+                    <StyledMuiTableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {
                         return <TableHeaderCell key={header.id} header={header} />;
                       })}
-                    </TableRow>
+                    </StyledMuiTableRow>
                   );
                 })}
               </>
@@ -194,9 +201,9 @@ export function Table({ data }: TableProps) {
               <>
                 {row.getVisibleCells().map((cell) => {
                   return (
-                    <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
+                    <StyledMuiTableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
                       <Typography noWrap>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Typography>
-                    </TableCell>
+                    </StyledMuiTableCell>
                   );
                 })}
               </>

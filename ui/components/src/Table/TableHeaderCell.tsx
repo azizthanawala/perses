@@ -25,10 +25,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  tableCellClasses,
 } from '@mui/material';
 import { useRef, useState } from 'react';
 import DotsVerticalIcon from 'mdi-material-ui/DotsVertical';
-import { MockData } from './Table';
+import { MockData, StyledMuiTableCell } from './Table';
 
 export interface TableHeaderCellProps {
   header: Header<MockData, unknown>;
@@ -57,7 +58,7 @@ export function TableHeaderCell({ header }: TableHeaderCellProps) {
   };
 
   return (
-    <TableCell
+    <StyledMuiTableCell
       key={header.id}
       sx={{
         backgroundColor: 'background.paper',
@@ -124,6 +125,6 @@ export function TableHeaderCell({ header }: TableHeaderCellProps) {
           </Menu>
         </>
       )}
-    </TableCell>
+    </StyledMuiTableCell>
   );
 }
