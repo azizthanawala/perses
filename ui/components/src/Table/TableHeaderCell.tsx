@@ -22,7 +22,12 @@ import {
   Checkbox,
   Box,
   Typography,
+  IconButton,
+  Menu,
+  MenuItem,
 } from '@mui/material';
+import { useRef, useState } from 'react';
+import DotsVerticalIcon from 'mdi-material-ui/DotsVertical';
 import { MockData } from './Table';
 
 export interface TableHeaderCellProps {
@@ -30,11 +35,26 @@ export interface TableHeaderCellProps {
 }
 
 export function TableHeaderCell({ header }: TableHeaderCellProps) {
-  const isSorted = header.column.getIsSorted();
-  const canSort = header.column.getCanSort();
-  const canResize = header.column.getCanResize();
-  const isResizing = header.column.getIsResizing();
-  const cellContent = flexRender(header.column.columnDef.header, header.getContext());
+  // const tableCellRef = useRef<HTMLElement | null>(null);
+  // const isMenuOpen = useState<boolean>(false)
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const { column } = header;
+
+  const isSorted = column.getIsSorted();
+  const canSort = column.getCanSort();
+  const canResize = column.getCanResize();
+  const isResizing = column.getIsResizing();
+  const cellContent = flexRender(column.columnDef.header, header.getContext());
+
+  const hasMenu = canSort;
+
+  const handleClickMenuButton: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    setMenuAnchorEl(e.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuAnchorEl(null);
+  };
 
   return (
     <TableCell
@@ -85,6 +105,24 @@ export function TableHeaderCell({ header }: TableHeaderCellProps) {
             }}
           />
         </Box>
+      )}
+      {hasMenu && (
+        <>
+          <IconButton size="small" onClick={handleClickMenuButton}>
+            <DotsVerticalIcon fontSize="inherit" />
+          </IconButton>
+          <Menu open={!!menuAnchorEl} anchorEl={menuAnchorEl} onClose={handleCloseMenu}>
+            <MenuItem onClick={column.clearSorting} disabled={!isSorted}>
+              Unsort
+            </MenuItem>
+            <MenuItem onClick={() => column.toggleSorting(false)} disabled={isSorted === 'asc'}>
+              Sort by ASC
+            </MenuItem>
+            <MenuItem onClick={() => column.toggleSorting(true)} disabled={isSorted === 'desc'}>
+              Sort by DESC
+            </MenuItem>
+          </Menu>
+        </>
       )}
     </TableCell>
   );
