@@ -24,8 +24,9 @@ import {
 } from '@mui/material';
 import { useState, forwardRef } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
+import { TableHeaderCell } from './TableHeaderCell';
 
-type MockData = {
+export type MockData = {
   name: string;
   value: number;
   color?: string;
@@ -160,66 +161,7 @@ export function Table({ data }: TableProps) {
                 return (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
-                      const isSorted = header.column.getIsSorted();
-                      const canSort = header.column.getCanSort();
-                      const canResize = header.column.getCanResize();
-                      const isResizing = header.column.getIsResizing();
-                      console.log(`canResize: ${canResize}`);
-
-                      const cellContent = flexRender(header.column.columnDef.header, header.getContext());
-
-                      return (
-                        <TableCell
-                          key={header.id}
-                          sx={{
-                            backgroundColor: 'background.paper',
-                            position: 'relative',
-                            width: header.getSize(),
-                          }}
-                        >
-                          {canSort ? (
-                            <TableSortLabel
-                              active={!!isSorted}
-                              direction={typeof isSorted === 'string' ? isSorted : undefined}
-                              onClick={header.column.getToggleSortingHandler()}
-                            >
-                              {cellContent}
-                            </TableSortLabel>
-                          ) : (
-                            cellContent
-                          )}
-                          {/* TODO: make the handles on this nicer, so the cursor doesn't flicker */}
-                          {canResize && (
-                            <Box
-                              onMouseDown={header.getResizeHandler()}
-                              onTouchStart={header.getResizeHandler()}
-                              sx={{
-                                position: 'absolute',
-                                right: 0,
-                                top: 0,
-                                height: '100%',
-                                padding: 2,
-                                userSelect: 'none',
-                                cursor: 'col-resize',
-                                '&:hover': {
-                                  ' > div': {
-                                    backgroundColor: (theme) => theme.palette.text.primary,
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  backgroundColor: (theme) => theme.palette.divider,
-                                  width: 2,
-                                  height: '100%',
-                                  cursor: 'col-resize',
-                                }}
-                              />
-                            </Box>
-                          )}
-                        </TableCell>
-                      );
+                      return <TableHeaderCell key={header.id} header={header} />;
                     })}
                   </TableRow>
                 );
