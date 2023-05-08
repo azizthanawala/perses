@@ -8,6 +8,7 @@ import {
   ColumnDef,
   SortingState,
   RowSelectionState,
+  getFilteredRowModel,
 } from '@tanstack/react-table';
 import {
   Table as MuiTable,
@@ -21,6 +22,7 @@ import {
   Checkbox,
   Box,
   Typography,
+  TextField,
 } from '@mui/material';
 import { useState, forwardRef } from 'react';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
@@ -88,6 +90,7 @@ const DEFAULT_COLUMNS: Array<ColumnDef<MockData>> = [
 export function Table({ data }: TableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [globalFilter, setGlobalFilter] = useState('');
 
   const table = useReactTable({
     data,
@@ -98,9 +101,12 @@ export function Table({ data }: TableProps) {
     onRowSelectionChange: setRowSelection,
     enableRowSelection: true,
     columnResizeMode: 'onChange',
+    enableFilters: true,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
       rowSelection,
+      globalFilter,
     },
   });
 
@@ -120,6 +126,10 @@ export function Table({ data }: TableProps) {
       console.log(`mouseout row idx ${index}, id ${row.id}`);
     }
   }
+
+  const handleGlobalFilterChange: React.InputHTMLAttributes<HTMLInputElement>['onChange'] = (e) => {
+    setGlobalFilter(e.target.value);
+  };
 
   const VirtuosoTableComponents: TableComponents<MockData> = {
     Scroller: forwardRef<HTMLDivElement>((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
@@ -150,44 +160,50 @@ export function Table({ data }: TableProps) {
   };
 
   return (
-    <Box style={{ height: 400, width: '100%' }}>
-      <TableVirtuoso
-        totalCount={rows.length}
-        components={VirtuosoTableComponents}
-        fixedHeaderContent={() => {
-          return (
-            <>
-              {table.getHeaderGroups().map((headerGroup) => {
-                return (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return <TableHeaderCell key={header.id} header={header} />;
-                    })}
-                  </TableRow>
-                );
-              })}
-            </>
-          );
-        }}
-        itemContent={(index) => {
-          const row = rows[index];
-          if (!row) {
-            return null;
-          }
+    <Box style={{ height: 400, width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box>
+        {/* TODO: this should be debounced when implemented for reals */}
+        <TextField onChange={handleGlobalFilterChange} value={globalFilter} />
+      </Box>
+      <Box style={{ width: '100%', flex: 1 }}>
+        <TableVirtuoso
+          totalCount={rows.length}
+          components={VirtuosoTableComponents}
+          fixedHeaderContent={() => {
+            return (
+              <>
+                {table.getHeaderGroups().map((headerGroup) => {
+                  return (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        return <TableHeaderCell key={header.id} header={header} />;
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </>
+            );
+          }}
+          itemContent={(index) => {
+            const row = rows[index];
+            if (!row) {
+              return null;
+            }
 
-          return (
-            <>
-              {row.getVisibleCells().map((cell) => {
-                return (
-                  <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
-                    <Typography noWrap>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Typography>
-                  </TableCell>
-                );
-              })}
-            </>
-          );
-        }}
-      />
+            return (
+              <>
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
+                      <Typography noWrap>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Typography>
+                    </TableCell>
+                  );
+                })}
+              </>
+            );
+          }}
+        />
+      </Box>
     </Box>
   );
 }
