@@ -31,6 +31,7 @@ import (
 )
 
 const kindPath = "kind"
+const loadType = "model"
 
 //go:embed base_def_query.cue
 var baseQueryDef []byte
@@ -269,10 +270,20 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 }
 
 func (s *sch) init() error {
-	for _, l := range s.loaders {
-		if err := l.Load(); err != nil {
+	return RunLoaders(s.loaders, "model_start")
+}
+
+func RunLoaders(loaders []Loader, loadType string) error {
+	totalSuccessfulLoads := 0
+	totalFailedLoads := 0
+	for _, l := range loaders {
+		successfulLoads, failedLoads, err := l.Load()
+		totalSuccessfulLoads += successfulLoads
+		totalFailedLoads += failedLoads
+		if err != nil {
 			return err
 		}
 	}
+	MonitorLoadAttempts(totalSuccessfulLoads, totalFailedLoads, loadType)
 	return nil
 }
